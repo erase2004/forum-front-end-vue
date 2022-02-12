@@ -70,6 +70,7 @@
       <button
         class="btn btn-lg btn-primary btn-block mb-3"
         type="submit"
+        :disabled="isProcessing"
       >
         Submit
       </button>
@@ -90,26 +91,76 @@
 </template>
 
 <script>
+import authorizationAPI from './../apis/authorization'
+import { Toast } from './../utils/helpers'
+
 export default {
   data () {
     return {
       name: '',
       email: '',
       password: '',
-      passwordCheck: ''
+      passwordCheck: '',
+      isProcessing: false
     }
   },
   methods: {
-    handleSubmit (e) {
-      const data = JSON.stringify({
-        name: this.name,
-        email: this.email,
-        password: this.password,
-        passwordCheck: this.passwordCheck
-      })
+    async handleSubmit (event) {
+      try {
+        if (!this.name) {
+          Toast.fire({
+            icon: 'warning',
+            title: '請填寫帳戶名稱'
+          })
+          return
+        }
+        if (!this.email) {
+          Toast.fire({
+            icon: 'warning',
+            title: '請填寫E-mail'
+          })
+          return
+        }
+        if (!this.password) {
+          Toast.fire({
+            icon: 'warning',
+            title: '請填寫密碼'
+          })
+          return
+        }
+        if (this.password !== this.passwordCheck) {
+          Toast.fire({
+            icon: 'warning',
+            title: '密碼並不一致'
+          })
+          return
+        }
 
-      // TODO: 向後端驗證使用者登入資訊是否合法
-      console.log('data', data)
+        this.isProcessing = true
+
+        const { data } = await authorizationAPI.signUp({
+          name: this.name,
+          email: this.email,
+          password: this.password,
+          passwordCheck: this.passwordCheck
+        })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        Toast.fire({
+          icon: 'success',
+          title: '成功建立帳號'
+        })
+        this.$router.push({ name: 'root' })
+      } catch (error) {
+        this.isProcessing = false
+        Toast.fire({
+          icon: 'error',
+          title: '無法建立帳號，請稍後再試'
+        })
+      }
     }
   }
 }

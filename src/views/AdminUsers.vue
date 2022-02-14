@@ -23,7 +23,7 @@
           </th>
         </tr>
       </thead>
-      <tbody>
+      <tbody v-show="!isLoading">
         <tr
           v-for="user in users"
           :key="user.id"
@@ -32,14 +32,14 @@
             {{ user.id }}
           </th>
           <td>{{ user.email }}</td>
-          <td>{{ user.isAdmin | userPermission }}</td>
+          <td>{{ user.isAdmin | userRole }}</td>
           <td>
-            <template v-if="user.name !== 'root'">
+            <template v-if="currentUser.id !== user.id">
               <button
                 v-show="user.isAdmin"
                 type="button"
                 class="btn btn-link"
-                @click.stop.prevent="togglePermission(user.id)"
+                @click.stop.prevent="toggleUserRole(user)"
               >
                 set as user
               </button>
@@ -47,7 +47,7 @@
                 v-show="!user.isAdmin"
                 type="button"
                 class="btn btn-link"
-                @click.stop.prevent="togglePermission(user.id)"
+                @click.stop.prevent="toggleUserRole(user)"
               >
                 set as admin
               </button>
@@ -61,64 +61,79 @@
 
 <script>
 import AdminNav from '@/components/AdminNav'
-
-const dummyData = {
-  users: [
-    {
-      id: 1,
-      name: 'root',
-      email: 'root@example.com',
-      isAdmin: true
-    },
-    {
-      id: 2,
-      name: 'user1',
-      email: 'user1@example.com',
-      isAdmin: false
-    },
-    {
-      id: 3,
-      name: 'user2',
-      email: 'user2@example.com',
-      isAdmin: false
-    }
-  ]
-}
+import adminAPI from '@/apis/admin'
+import { mapState } from 'vuex'
+import { Toast } from './../utils/helpers'
 
 export default {
   components: {
     AdminNav
   },
   filters: {
-    userPermission (isAdmin) {
+    userRole (isAdmin) {
       return isAdmin ? 'admin' : 'user'
     }
   },
   data () {
     return {
-      users: []
+      users: [],
+      isLoading: true
     }
+  },
+  computed: {
+    ...mapState(['currentUser'])
   },
   created () {
     this.fetchUsers()
   },
   methods: {
-    // 4. 定義 `fetchCategories` 方法，把 `dummyData` 帶入 Vue 物件
-    fetchUsers () {
-      this.users = dummyData.users
-    },
-    togglePermission (userId) {
-      console.log(`toggle permission of #${userId}`)
-      this.users = this.users.map(user => {
-        if (user.id === userId) {
-          return {
-            ...user,
-            isAdmin: !user.isAdmin
-          }
+    async fetchUsers () {
+      try {
+        const response = await adminAPI.users.get()
+
+        if (response.statusText !== 'OK') {
+          throw new Error(response.statusText)
         }
 
-        return user
-      })
+        this.users = response.data.users
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法取得使用者資料，請稍後再試'
+        })
+      } finally {
+        this.isLoading = false
+      }
+    },
+    async toggleUserRole ({ id: userId, isAdmin }) {
+      try {
+        const { data } = await adminAPI.users.toggleRole({ userId, isAdmin: !isAdmin })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        this.users = this.users.map(user => {
+          if (user.id === userId) {
+            return {
+              ...user,
+              isAdmin: !user.isAdmin
+            }
+          } else {
+            return user
+          }
+        })
+
+        Toast.fire({
+          icon: 'success',
+          title: '成功更新使用者角色'
+        })
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法更新使用者角色，請稍後再試'
+        })
+      }
     }
   }
 }

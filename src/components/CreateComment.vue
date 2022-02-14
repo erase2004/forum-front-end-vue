@@ -28,7 +28,8 @@
 </template>
 
 <script>
-import { v4 as uuidv4 } from 'uuid'
+import commentsAPI from './../apis/comments'
+import { Toast } from './../utils/helpers'
 
 export default {
   props: {
@@ -43,15 +44,34 @@ export default {
     }
   },
   methods: {
-    handleSubmit () {
-      // TODO: 向 API 發送 POST 請求
-      // 伺服器新增 Comment 成功後...
-      this.$emit('after-create-comment', {
-        commentId: uuidv4(), // 尚未串接 API 暫時使用隨機的 id
-        restaurantId: this.restaurantId,
-        text: this.text
-      })
-      this.text = ''
+    async handleSubmit () {
+      try {
+        const { data } = await commentsAPI.add({ restaurantId: this.restaurantId, text: this.text })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        const { commentId } = data
+
+        this.$emit('after-create-comment', {
+          commentId,
+          restaurantId: this.restaurantId,
+          text: this.text
+        })
+
+        Toast.fire({
+          icon: 'success',
+          title: '成功建立留言'
+        })
+
+        this.text = ''
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法建立留言，請稍後再試'
+        })
+      }
     }
   }
 }

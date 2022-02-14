@@ -101,6 +101,9 @@ export default {
           throw new Error(data.message)
         }
 
+        // 將資料傳到 Vuex 中
+        this.$store.commit('setCurrentUser', data.user)
+
         // 將 token 存放在 localStorage 內
         localStorage.setItem('token', data.token)
         this.$router.push('/restaurants')

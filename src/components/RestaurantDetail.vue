@@ -75,6 +75,9 @@
 </template>
 
 <script>
+import usersAPI from './../apis/users'
+import { Toast } from './../utils/helpers'
+
 export default {
   props: {
     initialRestaurant: {
@@ -87,29 +90,109 @@ export default {
       restaurant: this.initialRestaurant
     }
   },
+  watch: {
+    initialRestaurant (newValue) {
+      this.restaurant = {
+        ...this.restaurant,
+        ...newValue
+      }
+    }
+  },
   methods: {
-    addFavorite () {
-      this.restaurant = {
-        ...this.restaurant, // 保留餐廳內原有資料
-        isFavorited: true
+    async addFavorite () {
+      try {
+        const { data } = await usersAPI.addFavorite({ restaurantId: this.restaurant.id })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        this.restaurant = {
+          ...this.restaurant, // 保留餐廳內原有資料
+          isFavorited: true
+        }
+
+        Toast.fire({
+          icon: 'success',
+          title: '成功加入最愛'
+        })
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法加入最愛，請稍後再試'
+        })
       }
     },
-    deleteFavorite () {
-      this.restaurant = {
-        ...this.restaurant, // 保留餐廳內原有資料
-        isFavorited: false
+    async deleteFavorite () {
+      try {
+        const { data } = await usersAPI.deleteFavorite({ restaurantId: this.restaurant.id })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        this.restaurant = {
+          ...this.restaurant, // 保留餐廳內原有資料
+          isFavorited: false
+        }
+
+        Toast.fire({
+          icon: 'success',
+          title: '成功移除最愛'
+        })
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法移除最愛，請稍後再試'
+        })
       }
     },
-    addLike () {
-      this.restaurant = {
-        ...this.restaurant,
-        isLiked: true
+    async addLike () {
+      try {
+        const { data } = await usersAPI.addLike({ restaurantId: this.restaurant.id })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        this.restaurant = {
+          ...this.restaurant, // 保留餐廳內原有資料
+          isLiked: true
+        }
+
+        Toast.fire({
+          icon: 'success',
+          title: '成功按讚'
+        })
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法按讚，請稍後再試'
+        })
       }
     },
-    deleteLike () {
-      this.restaurant = {
-        ...this.restaurant,
-        isLiked: false
+    async deleteLike () {
+      try {
+        const { data } = await usersAPI.deleteLike({ restaurantId: this.restaurant.id })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        this.restaurant = {
+          ...this.restaurant, // 保留餐廳內原有資料
+          isLiked: false
+        }
+
+        Toast.fire({
+          icon: 'success',
+          title: '成功收回讚'
+        })
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法收回讚，請稍後再試'
+        })
       }
     }
   }

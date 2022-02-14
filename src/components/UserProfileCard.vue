@@ -55,16 +55,9 @@
 </template>
 
 <script>
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: '管理者',
-    email: 'root@example.com',
-    image: 'https://i.pravatar.cc/300',
-    isAdmin: true
-  },
-  isAuthenticated: true
-}
+import usersAPI from './../apis/users'
+import { Toast } from './../utils/helpers'
+import { mapState } from 'vuex'
 
 export default {
   props: {
@@ -77,21 +70,49 @@ export default {
       required: true
     }
   },
-  data () {
-    return {
-      currentUser: dummyUser.currentUser
-    }
+  computed: {
+    ...mapState(['currentUser'])
   },
   methods: {
-    follow (userId) {
-      // TODO: query backend API
-      console.log(`followed #${userId}`)
-      this.$emit('after-follow', this.currentUser)
+    async follow (userId) {
+      try {
+        const { data } = await usersAPI.addFollowing({ userId })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        this.$emit('after-follow', this.currentUser)
+        Toast.fire({
+          icon: 'success',
+          title: '成功跟隨用戶'
+        })
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法跟隨用戶，請稍後再試'
+        })
+      }
     },
-    unfollow (userId) {
-      // TODO: query backend API
-      console.log(`unfollowed #${userId}`)
-      this.$emit('after-unfollow', this.currentUser)
+    async unfollow (userId) {
+      try {
+        const { data } = await usersAPI.deleteFollowing({ userId })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        this.$emit('after-unfollow', this.currentUser)
+        Toast.fire({
+          icon: 'success',
+          title: '成功取消跟隨用戶'
+        })
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法取消跟隨用戶，請稍後再試'
+        })
+      }
     }
   }
 }

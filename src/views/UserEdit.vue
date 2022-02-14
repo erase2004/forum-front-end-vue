@@ -36,6 +36,7 @@
       <button
         type="submit"
         class="btn btn-primary"
+        :disabled="isProcessing"
       >
         Submit
       </button>
@@ -44,12 +45,9 @@
 </template>
 
 <script>
-const dummyData = {
-  user: {
-    name: 'root update',
-    image: 'https://i.imgur.com/58ImzMM.png'
-  }
-}
+import usersAPI from './../apis/users'
+import { Toast } from './../utils/helpers'
+import { mapState } from 'vuex'
 
 export default {
   data () {
@@ -57,29 +55,83 @@ export default {
       user: {
         name: '',
         image: ''
-      }
+      },
+      isProcessing: false
     }
   },
-  created () {
-    const { id } = this.$route.params
-    this.fetchUser(id)
+  beforeRouteUpdate (to, from, next) {
+    const { id: userId } = to.params
+
+    if (Number(userId) !== this.currentUser.id) {
+      this.$router.replace({ name: 'not-found' })
+    } else {
+      next()
+    }
+  },
+  computed: {
+    ...mapState(['currentUser'])
+  },
+  watch: {
+    currentUser (newValue) {
+      this.setUser(newValue)
+    }
   },
   methods: {
-    fetchUser (userId) {
-      console.log('user id:', userId)
-      const { user } = dummyData
-      this.user = {
-        ...this.user,
-        name: user.name,
-        image: user.image
+    setUser (currentUser) {
+      const { id } = this.$route.params
+
+      if (Number(id) !== currentUser.id) {
+        this.$router.replace({ name: 'not-found' })
+        return
+      }
+
+      try {
+        this.user = {
+          ...this.user,
+          name: currentUser.name,
+          image: currentUser.image
+        }
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法設定用戶資料，請稍後再試'
+        })
       }
     },
-    handleSubmit (e) {
+    async handleSubmit (e) {
       const form = e.target // <form></form>
       const formData = new FormData(form)
-      // 透過 API 將表單資料送到伺服器
-      for (const [name, value] of formData.entries()) {
-        console.log(name + ': ' + value)
+
+      if (formData.name === '') {
+        Toast.fire({
+          icon: 'warning',
+          title: '請設定用戶名稱'
+        })
+        return
+      }
+
+      try {
+        this.isProcessing = true
+
+        const { data } = await usersAPI.update({ userId: this.currentUser.id, formData })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        Toast.fire({
+          icon: 'success',
+          title: '成功更新用戶資訊'
+        })
+
+        this.$router.push({ name: 'user', params: { id: this.currentUser.id } })
+      } catch (error) {
+        Toast.fire({
+          icon: 'error',
+          title: '無法更新用戶資訊，請稍後再試'
+        })
+      } finally {
+        this.isProcessing = false
       }
     },
     handleFileChange (e) {

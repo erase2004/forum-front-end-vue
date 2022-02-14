@@ -101,8 +101,13 @@ const router = new Router({
       component: () => import('../views/AdminUsers.vue')
     },
     {
-      path: '*',
+      path: '/not-found',
       name: 'not-found',
+      component: NotFound
+    },
+    {
+      path: '*',
+      alias: '/not-found',
       component: NotFound
     }
   ]

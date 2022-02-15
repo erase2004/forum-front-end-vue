@@ -3,7 +3,11 @@
     <!-- AdminNav Component -->
     <AdminNav />
 
-    <table class="table">
+    <Spinner v-if="isLoading" />
+    <table
+      v-else
+      class="table"
+    >
       <thead class="thead-dark">
         <tr>
           <th scope="col">
@@ -23,7 +27,7 @@
           </th>
         </tr>
       </thead>
-      <tbody v-show="!isLoading">
+      <tbody>
         <tr
           v-for="user in users"
           :key="user.id"
@@ -62,12 +66,14 @@
 <script>
 import AdminNav from '@/components/AdminNav'
 import adminAPI from '@/apis/admin'
+import Spinner from '@/components/Spinner.vue'
 import { mapState } from 'vuex'
 import { Toast } from './../utils/helpers'
 
 export default {
   components: {
-    AdminNav
+    AdminNav,
+    Spinner
   },
   filters: {
     userRole (isAdmin) {

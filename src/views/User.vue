@@ -1,6 +1,7 @@
 <template>
+  <Spinner v-if="isLoading" />
   <div
-    v-show="!isLoading"
+    v-else
     class="container"
   >
     <!-- UserProfileCard -->
@@ -37,6 +38,7 @@ import UserFollowingsCard from './../components/UserFollowingsCard.vue'
 import UserFollowersCard from '../components/UserFollowersCard.vue'
 import UserCommentsCard from './../components/UserCommentsCard.vue'
 import UserFavoritedRestaurantsCard from './../components/UserFavoritedRestaurantsCard.vue'
+import Spinner from '@/components/Spinner.vue'
 import usersAPI from './../apis/users'
 import { Toast } from './../utils/helpers'
 
@@ -46,7 +48,8 @@ export default {
     UserFollowingsCard,
     UserFollowersCard,
     UserCommentsCard,
-    UserFavoritedRestaurantsCard
+    UserFavoritedRestaurantsCard,
+    Spinner
   },
   data () {
     return {

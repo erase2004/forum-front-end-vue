@@ -1,7 +1,8 @@
 <template>
   <div class="container py-5">
+    <Spinner v-if="isLoading" />
     <div
-      v-show="!isLoading"
+      v-else
       class="row"
     >
       <div class="col-md-12">
@@ -50,10 +51,14 @@
 <script>
 import { emptyImageFilter } from './../utils/mixin'
 import adminAPI from './../apis/admin'
+import Spinner from '@/components/Spinner.vue'
 import { Toast } from './../utils/helpers'
 
 export default {
   name: 'AdminRestaurant',
+  components: {
+    Spinner
+  },
   mixins: [emptyImageFilter],
   data () {
     return {

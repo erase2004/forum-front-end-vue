@@ -1,5 +1,9 @@
 <template>
-  <table class="table">
+  <Spinner v-if="isLoading" />
+  <table
+    v-else
+    class="table"
+  >
     <thead class="thead-dark">
       <tr>
         <th scope="col">
@@ -19,7 +23,7 @@
         </th>
       </tr>
     </thead>
-    <tbody v-show="!isLoading">
+    <tbody>
       <tr
         v-for="restaurant in restaurants"
         :key="restaurant.id"
@@ -59,9 +63,13 @@
 
 <script>
 import adminAPI from './../apis/admin'
+import Spinner from '@/components/Spinner.vue'
 import { Toast } from './../utils/helpers'
 
 export default {
+  components: {
+    Spinner
+  },
   data () {
     return {
       restaurants: [],

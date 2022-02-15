@@ -1,6 +1,7 @@
 <template>
+  <Spinner v-if="isLoading" />
   <form
-    v-show="!isLoading"
+    v-else
     @submit.stop.prevent="handleSubmit"
   >
     <div class="form-group">
@@ -120,9 +121,13 @@
 
 <script>
 import adminAPI from './../apis/admin'
+import Spinner from '@/components/Spinner.vue'
 import { Toast } from './../utils/helpers'
 
 export default {
+  components: {
+    Spinner
+  },
   props: {
     initialRestaurant: {
       type: Object,

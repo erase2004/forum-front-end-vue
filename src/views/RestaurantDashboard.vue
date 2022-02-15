@@ -1,6 +1,7 @@
 <template>
+  <Spinner v-if="isLoading" />
   <div
-    v-show="!isLoading"
+    v-else
     class="container py-5"
   >
     <div>
@@ -29,9 +30,13 @@
 
 <script>
 import restaurantsAPI from './../apis/restaurants'
+import Spinner from '@/components/Spinner.vue'
 import { Toast } from './../utils/helpers'
 
 export default {
+  components: {
+    Spinner
+  },
   data () {
     return {
       restaurant: {

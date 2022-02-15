@@ -25,7 +25,11 @@
         </div>
       </div>
     </form>
-    <table class="table">
+    <Spinner v-if="isLoading" />
+    <table
+      v-else
+      class="table"
+    >
       <thead class="thead-dark">
         <tr>
           <th
@@ -45,7 +49,7 @@
           </th>
         </tr>
       </thead>
-      <tbody v-show="!isLoading">
+      <tbody>
         <tr
           v-for="category in categories"
           :key="category.id"
@@ -108,11 +112,13 @@
 <script>
 import AdminNav from '@/components/AdminNav'
 import adminAPI from './../apis/admin'
+import Spinner from '@/components/Spinner.vue'
 import { Toast } from './../utils/helpers'
 
 export default {
   components: {
-    AdminNav
+    AdminNav,
+    Spinner
   },
   // 3. 定義 Vue 中使用的 data 資料
   data () {

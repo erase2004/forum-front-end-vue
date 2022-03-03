@@ -1,11 +1,8 @@
 # This is a basic workflow to help you get started with Actions
 name: deploy
 
-# Controls when the action will run.
+# Controls when the action will run. 
 on:
-  push:
-    branches:
-      - main
   # Triggers the workflow on push or pull request events but only for the main branch
   pull_request:
     branches:
@@ -25,12 +22,12 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
+      
       - name: Install & Build # 執行指令
         run: |
           npm install
-          npm run build
-
+          npm run build 
+          
       # Runs a single command using the runners shell
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@releases/v4
